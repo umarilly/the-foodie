@@ -1,0 +1,130 @@
+// Prisma schema for The Foodie
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  address      String?
+  role         Role     @default(CUSTOMER)
+  orders       Order[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  sortOrder Int        @default(0)
+  items     MenuItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model MenuItem {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String
+  priceCents  Int
+  imageUrl    String
+  rating      Float       @default(4.5)
+  isAvailable Boolean     @default(true)
+  isFeatured  Boolean     @default(false)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  orderNumber      String        @unique
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  status           OrderStatus   @default(PENDING)
+  paymentMethod    PaymentMethod
+  paymentStatus    PaymentStatus @default(PENDING)
+  subtotalCents    Int
+  deliveryFeeCents Int           @default(0)
+  totalCents       Int
+  contactName      String
+  contactPhone     String
+  deliveryAddress  String
+  notes            String?
+  items            OrderItem[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id                 String   @id @default(cuid())
+  orderId            String
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId         String?
+  menuItem           MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  nameSnapshot        String
+  priceCentsSnapshot Int
+  quantity           Int
+  createdAt          DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}

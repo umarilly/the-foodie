@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-foodie}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+      POSTGRES_DB: "${POSTGRES_DB:-foodie}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - foodie_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-foodie}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-foodie}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-foodie}?schema=public"
+      AUTH_SECRET: "${AUTH_SECRET:?Set AUTH_SECRET in .env, e.g. via openssl rand -base64 32}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3000}"
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      EMAIL_FROM: "${EMAIL_FROM:-The Foodie <onboarding@resend.dev>}"
+    ports:
+      - "3000:3000"
+    command: sh -c "node_modules/.bin/prisma migrate deploy && node server.js"
+
+volumes:
+  foodie_db_data:
