@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -224,36 +223,6 @@ async function main() {
       });
     }
   }
-
-  const adminPasswordHash = await bcrypt.hash("Admin123!", 12);
-  await prisma.user.upsert({
-    where: { email: "admin@thefoodie.example" },
-    update: {},
-    create: {
-      firstName: "Foodie",
-      lastName: "Admin",
-      email: "admin@thefoodie.example",
-      passwordHash: adminPasswordHash,
-      role: "ADMIN",
-      address: "G-9, Islamabad",
-      phone: "+92 300 0000000",
-    },
-  });
-
-  const demoPasswordHash = await bcrypt.hash("Demo1234!", 12);
-  await prisma.user.upsert({
-    where: { email: "demo@thefoodie.example" },
-    update: {},
-    create: {
-      firstName: "Demo",
-      lastName: "Customer",
-      email: "demo@thefoodie.example",
-      passwordHash: demoPasswordHash,
-      role: "CUSTOMER",
-      address: "House 12, Street 4, F-10, Islamabad",
-      phone: "+92 301 1111111",
-    },
-  });
 
   console.log("Seed complete.");
 }

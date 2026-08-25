@@ -35,7 +35,9 @@ production — no local Postgres or Docker needed.
 1. Create a Supabase project, then copy `.env.example` to `.env` and fill in
    `DATABASE_URL` (transaction pooler, port 6543) and `DIRECT_URL` (direct
    connection, port 5432) from Supabase's dashboard, plus `AUTH_SECRET`
-   (generate with `openssl rand -base64 32`).
+   (generate with `openssl rand -base64 32`). Also set `SEED_ADMIN_PASSWORD`
+   and `SEED_DEMO_PASSWORD` to passwords of your choice — the seed script
+   requires both and refuses to run without them.
 2. Install dependencies and set up the database:
 
    ```bash
@@ -49,13 +51,6 @@ production — no local Postgres or Docker needed.
    ```bash
    npm run dev
    ```
-
-Seeded accounts (from `prisma/seed.ts`):
-
-| Role     | Email                        | Password    |
-| -------- | ----------------------------- | ----------- |
-| Admin    | admin@thefoodie.example       | Admin123!   |
-| Customer | demo@thefoodie.example        | Demo1234!   |
 
 ## Environment variables
 
