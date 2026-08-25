@@ -29,19 +29,22 @@ earlier PHP + vanilla JS version of the same project.
 
 ## Local development
 
-1. Start Postgres (either `docker compose up db` from the repo root, or your
-   own local Postgres matching `DATABASE_URL`).
-2. Copy `.env.example` to `.env` and fill in `DATABASE_URL` / `AUTH_SECRET`
-   (generate a secret with `openssl rand -base64 32`).
-3. Install dependencies and set up the database:
+Local dev connects straight to the same Supabase Postgres project used in
+production — no local Postgres or Docker needed.
+
+1. Create a Supabase project, then copy `.env.example` to `.env` and fill in
+   `DATABASE_URL` (transaction pooler, port 6543) and `DIRECT_URL` (direct
+   connection, port 5432) from Supabase's dashboard, plus `AUTH_SECRET`
+   (generate with `openssl rand -base64 32`).
+2. Install dependencies and set up the database:
 
    ```bash
    npm install
-   npx prisma migrate dev
+   npx prisma migrate deploy
    npx prisma db seed
    ```
 
-4. Run the dev server:
+3. Run the dev server:
 
    ```bash
    npm run dev
@@ -53,17 +56,6 @@ Seeded accounts (from `prisma/seed.ts`):
 | -------- | ----------------------------- | ----------- |
 | Admin    | admin@thefoodie.example       | Admin123!   |
 | Customer | demo@thefoodie.example        | Demo1234!   |
-
-## Docker
-
-From the repository root:
-
-```bash
-docker compose up --build
-```
-
-This starts Postgres and the app (migrations run automatically on
-container start). The app is served at `http://localhost:3000`.
 
 ## Environment variables
 
