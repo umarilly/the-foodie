@@ -4,7 +4,11 @@ import { MenuItemCard } from "@/components/menu/menu-item-card";
 import { getFeaturedItems } from "@/lib/data/menu";
 
 export async function FeaturedDishes() {
-  const items = await getFeaturedItems();
+  // Best-effort: this is the only homepage section that touches the
+  // database (Hero/HowItWorks/WhyChooseUs/CtaBanner are all static), so a
+  // DB outage here shouldn't 500 the entire homepage - degrade to hiding
+  // this section instead, same as items.length === 0 already does below.
+  const items = await getFeaturedItems().catch(() => []);
 
   if (items.length === 0) return null;
 
